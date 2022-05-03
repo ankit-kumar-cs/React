@@ -7,21 +7,19 @@ import {
   CardTitle,
   Breadcrumb,
   BreadcrumbItem,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  Label,
-  Button,
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
+import Loading from "./LoadingComponent";
+import { baseUrl } from "../shared/baseUrl";
+import { Fade, Stagger } from 'react-animation-components';
 
 class DishDetail extends Component {
   renderDish(dish) {
     if (dish != null)
       return (
         <Card>
-          <CardImg top src={dish.image} alt={dish.name} />
+          <CardImg top src={baseUrl + dish.image} alt={dish.name} />
           <CardBody>
             <CardTitle>{dish.name}</CardTitle>
             <CardText>{dish.description}</CardText>
@@ -45,26 +43,46 @@ class DishDetail extends Component {
    * @param {*} dish Selected Dish
    * @returns the view showing all of the comments
    */
-  renderComments(comments) {
-    if (comments.length) {
+  renderComments(comments, commentsLoading, commentsErrorMessage) {
+    if(commentsLoading) {
+      return (
+        <Loading/>
+      )
+    }
+    else if(commentsErrorMessage) {
+      return (
+        <div>
+          <p>{commentsErrorMessage}</p>
+          <p>Something went wrong while fetching the comments.</p>
+      </div>
+      )
+    }
+    else if (comments.length) {
+      const dishId = comments[0].dishId;
       const commentsInfo = comments.map((element) => {
         return (
-          <ul key={element.id} className="list-unstyled">
-            <li>{element.comment}</li>
-            <li>
-              -- {element.author},{" "}
-              {new Intl.DateTimeFormat("en-US", this.options()).format(
-                new Date(Date.parse(element.date))
-              )}
-            </li>
-          </ul>
+          <Fade in key={element.id}>
+            <ul key={element.id} className="list-unstyled">
+              <li>{element.comment}</li>
+              <li>
+                -- {element.author},{" "}
+                {new Intl.DateTimeFormat("en-US", this.options()).format(
+                  new Date(Date.parse(element.date))
+                )}
+              </li>
+            </ul>
+          </Fade>
         );
       });
       return (
         <Fragment>
-          <Fragment>{commentsInfo}</Fragment>
           <Fragment>
-            <CommentForm />
+            <Stagger in>
+              {commentsInfo}
+            </Stagger>
+          </Fragment>
+          <Fragment>
+            <CommentForm postComment={this.props.postComment} dishId={dishId}/>
           </Fragment>
         </Fragment>
       );
@@ -73,6 +91,16 @@ class DishDetail extends Component {
     }
   }
   render() {
+    if(this.props.isLoading) {
+      return (
+        <Loading/>
+      )
+    }
+    else if(this.props.errorMessage) {
+      return (
+        <h1>Error Occurred</h1>
+      )
+    }
     return (
       <div className="container">
         <div className="row">
@@ -93,7 +121,7 @@ class DishDetail extends Component {
           </div>
           <div className="col-12 col-md-5 m-1">
             <h4>Comments</h4>
-            {this.renderComments(this.props.comments)}
+            {this.renderComments(this.props.comments, this.props.commentsLoading, this.props.commentsErrorMessage)}
           </div>
         </div>
       </div>

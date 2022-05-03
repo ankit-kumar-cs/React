@@ -8,10 +8,26 @@ import {
   Media,
 } from "reactstrap";
 import { Link } from "react-router-dom";
+import Loading from "./LoadingComponent";
+import { baseUrl } from "../shared/baseUrl";
+import { Fade, Stagger } from 'react-animation-components';
+
 
 function About(props) {
-  const leaders = props.leaders.map((leader) => {
-    return <RenderLeader key={leader.id} leader={leader} />;
+  const {isLoading, errorMessage, leaders} = props;
+  if(isLoading) return (<Loading/>);
+  else if(errorMessage) return (
+    <div className="container">
+      <p>{errorMessage}</p>
+      <p>Something went wrong while fetching the leaders.</p>
+    </div>
+  )
+  const leadersList = leaders.map((leader) => {
+    return (
+      <Fade in key={leader.id}>
+        <RenderLeader leader={leader} />
+      </Fade>
+    )
   });
 
   return (
@@ -89,7 +105,9 @@ function About(props) {
         <div className="col-12">
           <h2>Corporate Leadership</h2>
         </div>
-        {leaders}
+        <Stagger in>
+          {leadersList}
+        </Stagger>
       </div>
     </div>
   );
@@ -100,7 +118,7 @@ function RenderLeader({ leader }) {
     <div className="col-12 mt-5">
       <Media className="row">
         <Media left className="col-2">
-          <Media object src={leader.image} alt={leader.name} />
+          <Media object src={baseUrl + leader.image} alt={leader.name} />
         </Media>
         <Media body className="col-7 px-5 px-lg-1">
           <Media heading>{leader.name}</Media>

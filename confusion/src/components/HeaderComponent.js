@@ -16,6 +16,7 @@ import {
   Label,
 } from "reactstrap";
 import { NavLink } from "react-router-dom";
+import { baseUrl } from "../shared/baseUrl";
 
 class Header extends Component {
   constructor(props) {
@@ -85,7 +86,7 @@ class Header extends Component {
               <Nav navbar>
                 <NavbarBrand href="/">
                   <img
-                    src="assets/images/logo.png"
+                    src={baseUrl + 'images/logo.png'}
                     height="30"
                     width="41"
                     alt="Ristorante Con Fusion"
